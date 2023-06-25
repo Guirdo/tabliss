@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { setWidgetDisplay } from "../../db/action";
 import { WidgetState } from "../../db/state";
 import { useToggle } from "../../hooks";
@@ -8,6 +8,7 @@ import PluginContainer from "../shared/Plugin";
 import ToggleSection from "../shared/ToggleSection";
 import "./Widget.sass";
 import WidgetDisplay from "./WidgetDisplay";
+import ConfirmDialog from "./ConfirmDialog";
 
 interface Props {
   plugin: WidgetState;
@@ -23,17 +24,32 @@ const Widget: React.FC<Props> = ({
   onRemove,
 }) => {
   const [isOpen, toggleIsOpen] = useToggle(onRemove === undefined);
+  const dialogRef = useRef<HTMLDialogElement>(null)
 
   const { description, name, settingsComponent } = getConfig(plugin.key);
 
   const setDisplay = setWidgetDisplay.bind(null, plugin.id);
 
+  const handleRemove = () => {
+    (dialogRef as any).current?.show()
+  }
+
+  const handleCancel = () => {
+    (dialogRef as any).current?.close()
+  }
+
   return (
     <fieldset className="Widget">
       <div className="title--buttons">
-        <IconButton onClick={onRemove} title="Remove widget">
+        <IconButton onClick={handleRemove} title="Remove widget">
           <RemoveIcon />
         </IconButton>
+
+        <ConfirmDialog
+          thisRef={dialogRef}
+          handleCancel={handleCancel}
+          onRemove={onRemove}  
+        />
 
         <IconButton
           onClick={toggleIsOpen}
